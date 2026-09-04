@@ -36,21 +36,41 @@ int main(int argc, char **argv)
     }
 
     char *cbld_sources_path = strconcat(cbld_dir, "/sources");
+
     char *cbld_cflags_path = strconcat(cbld_dir, "/cflags");
     char *cbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
+
     char *cbld_target_path = strconcat(cbld_dir, "/target");
+
+    char *cbld_compiler_path = strconcat(cbld_dir, "/compiler");
+    char *cbld_linker_path = strconcat(cbld_dir, "/linker");
+
     char *cbld_includes_path = strconcat(cbld_dir, "/includes");
 
-    if (!cbld_sources_path ||
+    if (
+        !cbld_sources_path ||
+
         !cbld_cflags_path ||
         !cbld_ldflags_path ||
+
         !cbld_target_path ||
-        !cbld_includes_path) {
+
+        !cbld_compiler_path ||
+        !cbld_linker_path ||
+
+        !cbld_includes_path
+    ) {
 
         free(cbld_sources_path);
+
         free(cbld_cflags_path);
         free(cbld_ldflags_path);
+
         free(cbld_target_path);
+
+        free(cbld_compiler_path);
+        free(cbld_linker_path);
+
         free(cbld_includes_path);
 
         free(build_dir);
@@ -78,8 +98,31 @@ int main(int argc, char **argv)
 
     if (file_read(cbld_ldflags_path, &cbld_ldflags) < 0) {
         fprintf(stderr, "failed to read ldflags");
+
         file_free(&cbld_cflags);
         file_free(&cbld_sources);
+
+        goto cleanup_paths;
+    }
+
+    file_data_t cbld_compiler;
+
+    if (file_read(cbld_compiler_path, &cbld_compiler) < 0) {
+        fprintf(stderr, "failed to read compiler\n");
+        file_free(&cbld_ldflags);
+        file_free(&cbld_cflags);
+        file_free(&cbld_sources);
+        goto cleanup_paths;
+    }
+
+    file_data_t cbld_linker;
+
+    if (file_read(cbld_linker_path, &cbld_linker) < 0) {
+        fprintf(stderr, "failed to read compiler\n");
+        file_free(&cbld_ldflags);
+        file_free(&cbld_cflags);
+        file_free(&cbld_sources);
+        file_free(&cbld_compiler);
         goto cleanup_paths;
     }
 
@@ -192,6 +235,57 @@ int main(int argc, char **argv)
         goto cleanup_paths;
     }
 
+    size_t compiler_count;
+
+    char **compiler = str_unpack(
+        cbld_compiler.data,
+        cbld_compiler.size,
+        &compiler_count
+    );
+
+    if (!compiler || compiler_count == 0) {
+        fprintf(stderr, "failed to read compiler\n");
+
+        str_unpack_free(ldflags);
+        str_unpack_free(cflags);
+        str_unpack_free(sources);
+
+        file_free(&cbld_target);
+        file_free(&cbld_compiler);
+        file_free(&cbld_ldflags);
+        file_free(&cbld_cflags);
+        file_free(&cbld_includes);
+        file_free(&cbld_sources);
+
+        goto cleanup_paths;
+    }
+
+    size_t linker_count;
+
+    char **linker = str_unpack(
+        cbld_linker.data,
+        cbld_linker.size,
+        &linker_count
+    );
+
+    if (!linker || linker_count == 0) {
+        fprintf(stderr, "failed to read linker\n");
+
+        str_unpack_free(ldflags);
+        str_unpack_free(cflags);
+        str_unpack_free(sources);
+
+        file_free(&cbld_target);
+        file_free(&cbld_compiler);
+        file_free(&cbld_linker);
+        file_free(&cbld_ldflags);
+        file_free(&cbld_cflags);
+        file_free(&cbld_includes);
+        file_free(&cbld_sources);
+
+        goto cleanup_paths;
+    }
+
     size_t target_count;
 
     char **target = str_unpack(
@@ -255,6 +349,9 @@ int main(int argc, char **argv)
 
         goto cleanup_paths;
     }
+
+    char *compiler_str = compiler[0];
+    char *linker_str = linker[0];
 
     size_t spawned = 0;
 
@@ -320,7 +417,7 @@ int main(int argc, char **argv)
 
         size_t n = 0;
 
-        args[n++] = "clang";
+        args[n++] = compiler_str;
 
         for (size_t j = 0; j < includes_count; j++) {
             char *include_path = strconcat(dir_path, "/");
@@ -357,7 +454,7 @@ int main(int argc, char **argv)
         printf("compiling: %s\n", sources[i]);
 
         processes[i] = proc_spawn(
-            "clang",
+            compiler_str,
             args
         );
 
@@ -367,7 +464,8 @@ int main(int argc, char **argv)
         if (processes[i] == INVALID_PROC_HANDLE) {
             fprintf(
                 stderr,
-                "failed to spawn clang for %s\n",
+                "failed to spawn %s for %s\n",
+                compiler_str,
                 sources[i]
             );
 
@@ -420,7 +518,8 @@ int main(int argc, char **argv)
         if (exit_code != 0) {
             fprintf(
                 stderr,
-                "clang failed for %s (exit code %d)\n",
+                "%s failed for %s (exit code %d)\n",
+                linker_str,
                 sources[i],
                 exit_code
             );
@@ -454,7 +553,7 @@ int main(int argc, char **argv)
 
         size_t n = 0;
 
-        link_args[n++] = "clang";
+        link_args[n++] = linker_str;
 
         for (size_t i = 0; i < source_count; i++)
             link_args[n++] = objects[i];
@@ -470,7 +569,7 @@ int main(int argc, char **argv)
         printf("linking: %s\n", target[0]);
 
         proc_handle_t linker = proc_spawn(
-            "clang",
+            linker_str,
             link_args
         );
 
