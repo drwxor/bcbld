@@ -1,3 +1,2 @@
 /test
-*.cmd
-*.exe
+/cbld
