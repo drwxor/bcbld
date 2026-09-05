@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "str.h"
 #include "file.h"
@@ -19,13 +20,14 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (dir_create(build_dir) < 0) {
         fprintf(stderr, "failed to create .build directory\n");
-
+        free(build_dir);
         return 1;
     }
 
     char *cbld_sources_path = strconcat(cbld_dir, "/sources");
 
     char *cbld_cflags_path = strconcat(cbld_dir, "/cflags");
+    char *cbld_cxxflags_path = strconcat(cbld_dir, "/cxxflags");
     char *cbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
 
     char *cbld_target_path = strconcat(cbld_dir, "/target");
@@ -37,21 +39,18 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (
         !cbld_sources_path ||
-
         !cbld_cflags_path ||
+        !cbld_cxxflags_path ||
         !cbld_ldflags_path ||
-
         !cbld_target_path ||
-
         !cbld_compiler_path ||
         !cbld_linker_path ||
-
         !cbld_includes_path
     ) {
-
         free(cbld_sources_path);
 
         free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
         free(cbld_ldflags_path);
 
         free(cbld_target_path);
@@ -61,81 +60,84 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
         free(cbld_includes_path);
 
+        free(build_dir);
+
         return 1;
     }
 
-    file_data_t cbld_sources;
+    file_data_t cbld_sources = {0};
+    file_data_t cbld_cflags = {0};
+    file_data_t cbld_cxxflags = {0};
+    file_data_t cbld_ldflags = {0};
+    file_data_t cbld_compiler = {0};
+    file_data_t cbld_linker = {0};
+    file_data_t cbld_target = {0};
+    file_data_t cbld_includes = {0};
+
+    char **sources = NULL;
+    char **cflags = NULL;
+    char **cxxflags = NULL;
+    char **includes = NULL;
+    char **ldflags = NULL;
+    char **compiler = NULL;
+    char **linker = NULL;
+    char **target = NULL;
+
+    size_t source_count = 0;
+    size_t cflags_count = 0;
+    size_t cxxflags_count = 0;
+    size_t includes_count = 0;
+    size_t ldflags_count = 0;
+    size_t compiler_count = 0;
+    size_t linker_count = 0;
+    size_t target_count = 0;
+
+    char **objects = NULL;
+    proc_handle_t *processes = NULL;
+
+    char *target_path = NULL;
 
     if (file_read(cbld_sources_path, &cbld_sources) < 0) {
         fprintf(stderr, "failed to read sources\n");
-        goto cleanup_paths;
+        goto cleanup;
     }
-
-    file_data_t cbld_cflags;
 
     if (file_read(cbld_cflags_path, &cbld_cflags) < 0) {
         fprintf(stderr, "failed to read cflags\n");
-        file_free(&cbld_sources);
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    file_data_t cbld_ldflags;
+    if (file_read(cbld_cxxflags_path, &cbld_cxxflags) < 0) {
+        fprintf(stderr, "failed to read cxxflags\n");
+        goto cleanup;
+    }
 
     if (file_read(cbld_ldflags_path, &cbld_ldflags) < 0) {
-        fprintf(stderr, "failed to read ldflags");
-
-        file_free(&cbld_cflags);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        fprintf(stderr, "failed to read ldflags\n");
+        goto cleanup;
     }
-
-    file_data_t cbld_compiler;
 
     if (file_read(cbld_compiler_path, &cbld_compiler) < 0) {
         fprintf(stderr, "failed to read compiler\n");
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_sources);
-        goto cleanup_paths;
+        goto cleanup;
     }
-
-    file_data_t cbld_linker;
 
     if (file_read(cbld_linker_path, &cbld_linker) < 0) {
-        fprintf(stderr, "failed to read compiler\n");
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_sources);
-        file_free(&cbld_compiler);
-        goto cleanup_paths;
+        fprintf(stderr, "failed to read linker\n");
+        goto cleanup;
     }
-
-    file_data_t cbld_target;
 
     if (file_read(cbld_target_path, &cbld_target) < 0) {
         fprintf(stderr, "failed to read target\n");
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_sources);
-        goto cleanup_paths;
+        goto cleanup;
     }
-
-    file_data_t cbld_includes;
 
     if (file_read(cbld_includes_path, &cbld_includes) < 0) {
         fprintf(stderr, "failed to read includes\n");
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-        file_free(&cbld_target);
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t source_count;
-
-    char **sources = str_unpack(
+    sources = str_unpack(
         cbld_sources.data,
         cbld_sources.size,
         &source_count
@@ -143,19 +145,10 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!sources) {
         fprintf(stderr, "failed to unpack sources\n");
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t cflags_count;
-
-    char **cflags = str_unpack(
+    cflags = str_unpack(
         cbld_cflags.data,
         cbld_cflags.size,
         &cflags_count
@@ -163,21 +156,21 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!cflags) {
         fprintf(stderr, "failed to unpack cflags\n");
-
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t includes_count;
+    cxxflags = str_unpack(
+        cbld_cxxflags.data,
+        cbld_cxxflags.size,
+        &cxxflags_count
+    );
 
-    char **includes = str_unpack(
+    if (!cxxflags) {
+        fprintf(stderr, "failed to unpack cxxflags\n");
+        goto cleanup;
+    }
+
+    includes = str_unpack(
         cbld_includes.data,
         cbld_includes.size,
         &includes_count
@@ -185,21 +178,10 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!includes) {
         fprintf(stderr, "failed to unpack includes\n");
-
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t ldflags_count;
-
-    char **ldflags = str_unpack(
+    ldflags = str_unpack(
         cbld_ldflags.data,
         cbld_ldflags.size,
         &ldflags_count
@@ -207,22 +189,10 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!ldflags) {
         fprintf(stderr, "failed to unpack ldflags\n");
-
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t compiler_count;
-
-    char **compiler = str_unpack(
+    compiler = str_unpack(
         cbld_compiler.data,
         cbld_compiler.size,
         &compiler_count
@@ -230,24 +200,10 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!compiler || compiler_count == 0) {
         fprintf(stderr, "failed to read compiler\n");
-
-        str_unpack_free(ldflags);
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_compiler);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t linker_count;
-
-    char **linker = str_unpack(
+    linker = str_unpack(
         cbld_linker.data,
         cbld_linker.size,
         &linker_count
@@ -255,25 +211,10 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!linker || linker_count == 0) {
         fprintf(stderr, "failed to read linker\n");
-
-        str_unpack_free(ldflags);
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_compiler);
-        file_free(&cbld_linker);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    size_t target_count;
-
-    char **target = str_unpack(
+    target = str_unpack(
         cbld_target.data,
         cbld_target.size,
         &target_count
@@ -281,58 +222,20 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     if (!target || target_count == 0) {
         fprintf(stderr, "failed to read target\n");
-
-        str_unpack_free(ldflags);
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
     if (source_count == 0) {
         fprintf(stderr, "no sources specified\n");
-
-        str_unpack_free(target);
-        str_unpack_free(ldflags);
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_includes);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
-    char **objects = malloc(source_count * sizeof(*objects));
-    proc_handle_t *processes =
-        malloc(source_count * sizeof(*processes));
+    objects = calloc(source_count, sizeof(*objects));
+    processes = calloc(source_count, sizeof(*processes));
 
     if (!objects || !processes) {
         fprintf(stderr, "failed to allocate build data\n");
-
-        free(objects);
-        free(processes);
-
-        str_unpack_free(target);
-        str_unpack_free(ldflags);
-        str_unpack_free(cflags);
-        str_unpack_free(sources);
-
-        file_free(&cbld_target);
-        file_free(&cbld_ldflags);
-        file_free(&cbld_cflags);
-        file_free(&cbld_sources);
-
-        goto cleanup_paths;
+        goto cleanup;
     }
 
     char *compiler_str = compiler[0];
@@ -380,19 +283,36 @@ static int build(const char *dir_path, const char *cbld_dir) {
             goto kill_processes;
         }
 
-        size_t argc_clang =
+        const char *source = sources[i];
+        const char *extension = strrchr(source, '.');
+
+        int is_cpp =
+            extension &&
+            (
+                strcmp(extension, ".cpp") == 0 ||
+                strcmp(extension, ".cc") == 0 ||
+                strcmp(extension, ".cxx") == 0 ||
+                strcmp(extension, ".C") == 0
+            );
+
+        size_t flags_count = is_cpp
+            ? cxxflags_count
+            : cflags_count;
+
+        size_t argc =
             1 +
-            cflags_count +
+            includes_count +
+            flags_count +
             4;
 
         char **args = malloc(
-            (argc_clang + 1) * sizeof(*args)
+            (argc + 1) * sizeof(*args)
         );
 
         if (!args) {
             fprintf(
                 stderr,
-                "failed to allocate clang arguments\n"
+                "failed to allocate compiler arguments\n"
             );
 
             free(source_path);
@@ -401,33 +321,70 @@ static int build(const char *dir_path, const char *cbld_dir) {
         }
 
         size_t n = 0;
+        size_t include_args_count = 0;
 
         args[n++] = compiler_str;
 
         for (size_t j = 0; j < includes_count; j++) {
-            char *include_path = strconcat(dir_path, "/");
-            if (!include_path)
-                goto cleanup_objects;
+            char *include_path = strconcat(
+                dir_path,
+                "/"
+            );
 
-            char *tmp = include_path;
+            if (!include_path) {
+                fprintf(
+                    stderr,
+                    "failed to create include path\n"
+                );
 
-            include_path = strconcat(include_path, includes[j]);
+                goto compile_cleanup;
+            }
+
+            tmp = include_path;
+
+            include_path = strconcat(
+                include_path,
+                includes[j]
+            );
+
             free(tmp);
 
-            if (!include_path)
-                goto cleanup_objects;
+            if (!include_path) {
+                fprintf(
+                    stderr,
+                    "failed to create include path\n"
+                );
 
-            char *include_arg = strconcat("-I", include_path);
+                goto compile_cleanup;
+            }
+
+            char *include_arg = strconcat(
+                "-I",
+                include_path
+            );
+
             free(include_path);
 
-            if (!include_arg)
-                goto cleanup_objects;
+            if (!include_arg) {
+                fprintf(
+                    stderr,
+                    "failed to create include argument\n"
+                );
+
+                goto compile_cleanup;
+            }
 
             args[n++] = include_arg;
+            include_args_count++;
         }
 
-        for (size_t j = 0; j < cflags_count; j++)
-            args[n++] = cflags[j];
+        if (is_cpp) {
+            for (size_t j = 0; j < cxxflags_count; j++)
+                args[n++] = cxxflags[j];
+        } else {
+            for (size_t j = 0; j < cflags_count; j++)
+                args[n++] = cflags[j];
+        }
 
         args[n++] = "-c";
         args[n++] = source_path;
@@ -442,6 +399,9 @@ static int build(const char *dir_path, const char *cbld_dir) {
             compiler_str,
             args
         );
+
+        for (size_t j = 0; j < include_args_count; j++)
+            free(args[1 + j]);
 
         free(args);
         free(source_path);
@@ -458,24 +418,45 @@ static int build(const char *dir_path, const char *cbld_dir) {
         }
 
         spawned++;
+        continue;
+
+compile_cleanup:
+        for (size_t j = 0; j < include_args_count; j++)
+            free(args[1 + j]);
+
+        free(args);
+        free(source_path);
+
+        goto kill_processes;
+    }
+
+    target_path = strconcat(
+        dir_path,
+        "/"
+    );
+
+    if (!target_path) {
+        fprintf(stderr, "failed to create target path\n");
+        goto kill_processes;
+    }
+
+    char *tmp = target_path;
+
+    target_path = strconcat(
+        target_path,
+        target[0]
+    );
+
+    free(tmp);
+
+    if (!target_path) {
+        fprintf(stderr, "failed to create target path\n");
+        goto kill_processes;
     }
 
     int failed = 0;
 
-    char *target_path = strconcat(dir_path, "/");
-    if (!target_path)
-        goto cleanup_objects;
-
-    char *tmp = target_path;
-
-    target_path = strconcat(target_path, target[0]);
-    free(tmp);
-
-    if (!target_path)
-        goto cleanup_objects;
-
     for (size_t i = 0; i < source_count; i++) {
-
         int exit_code;
 
         if (proc_wait(processes[i], &exit_code) < 0) {
@@ -504,7 +485,7 @@ static int build(const char *dir_path, const char *cbld_dir) {
             fprintf(
                 stderr,
                 "%s failed for %s (exit code %d)\n",
-                linker_str,
+                compiler_str,
                 sources[i],
                 exit_code
             );
@@ -514,7 +495,7 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     if (failed)
-        goto cleanup_objects;
+        goto cleanup;
 
     {
         size_t link_argc =
@@ -533,7 +514,7 @@ static int build(const char *dir_path, const char *cbld_dir) {
                 "failed to allocate linker arguments\n"
             );
 
-            goto cleanup_objects;
+            goto cleanup;
         }
 
         size_t n = 0;
@@ -553,28 +534,27 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
         printf("linking: %s\n", target[0]);
 
-        proc_handle_t linker = proc_spawn(
+        proc_handle_t link_process = proc_spawn(
             linker_str,
             link_args
         );
 
         free(link_args);
 
-        if (linker == INVALID_PROC_HANDLE) {
+        if (link_process == INVALID_PROC_HANDLE) {
             fprintf(stderr, "failed to spawn linker\n");
-            goto cleanup_objects;
+            goto cleanup;
         }
 
         int link_exit_code;
 
-        if (proc_wait(linker, &link_exit_code) < 0) {
+        if (proc_wait(link_process, &link_exit_code) < 0) {
             fprintf(stderr, "failed to wait for linker\n");
-            proc_close(linker);
-            goto cleanup_objects;
+            proc_close(link_process);
+            goto cleanup;
         }
 
-        proc_close(linker);
-
+        proc_close(link_process);
 
         if (link_exit_code != 0) {
             fprintf(
@@ -583,10 +563,11 @@ static int build(const char *dir_path, const char *cbld_dir) {
                 link_exit_code
             );
 
-            goto cleanup_objects;
+            goto cleanup;
         }
     }
 
+    free(target_path);
 
     for (size_t i = 0; i < source_count; i++)
         free(objects[i]);
@@ -597,20 +578,35 @@ static int build(const char *dir_path, const char *cbld_dir) {
     str_unpack_free(target);
     str_unpack_free(ldflags);
     str_unpack_free(cflags);
+    str_unpack_free(cxxflags);
     str_unpack_free(sources);
     str_unpack_free(includes);
+    str_unpack_free(compiler);
+    str_unpack_free(linker);
 
     file_free(&cbld_target);
     file_free(&cbld_ldflags);
     file_free(&cbld_cflags);
+    file_free(&cbld_cxxflags);
     file_free(&cbld_sources);
     file_free(&cbld_includes);
+    file_free(&cbld_compiler);
+    file_free(&cbld_linker);
 
     free(cbld_sources_path);
+
     free(cbld_cflags_path);
+    free(cbld_cxxflags_path);
     free(cbld_ldflags_path);
+
     free(cbld_target_path);
+
+    free(cbld_compiler_path);
+    free(cbld_linker_path);
+
     free(cbld_includes_path);
+
+    free(build_dir);
 
     return 0;
 
@@ -621,33 +617,66 @@ kill_processes:
         proc_close(processes[i]);
     }
 
-cleanup_objects:
-    for (size_t i = 0; i < source_count; i++)
-        free(objects[i]);
+cleanup:
+    free(target_path);
+
+    if (objects) {
+        for (size_t i = 0; i < source_count; i++)
+            free(objects[i]);
+    }
 
     free(processes);
     free(objects);
 
-    str_unpack_free(target);
-    str_unpack_free(ldflags);
-    str_unpack_free(cflags);
-    str_unpack_free(sources);
-    str_unpack_free(includes);
+    if (target)
+        str_unpack_free(target);
+
+    if (ldflags)
+        str_unpack_free(ldflags);
+
+    if (cflags)
+        str_unpack_free(cflags);
+
+    if (cxxflags)
+        str_unpack_free(cxxflags);
+
+    if (sources)
+        str_unpack_free(sources);
+
+    if (includes)
+        str_unpack_free(includes);
+
+    if (compiler)
+        str_unpack_free(compiler);
+
+    if (linker)
+        str_unpack_free(linker);
 
     file_free(&cbld_target);
     file_free(&cbld_ldflags);
     file_free(&cbld_cflags);
+    file_free(&cbld_cxxflags);
     file_free(&cbld_sources);
     file_free(&cbld_includes);
+    file_free(&cbld_compiler);
+    file_free(&cbld_linker);
 
-cleanup_paths:
     free(cbld_sources_path);
+
     free(cbld_cflags_path);
+    free(cbld_cxxflags_path);
     free(cbld_ldflags_path);
+
     free(cbld_target_path);
+
+    free(cbld_compiler_path);
+    free(cbld_linker_path);
+
     free(cbld_includes_path);
 
+    free(build_dir);
+
     return 1;
-};
+}
 
 #endif
