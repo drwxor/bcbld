@@ -25,39 +25,114 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     char *cbld_sources_path = strconcat(cbld_dir, "/sources");
+    if (!cbld_sources_path) {
+        fprintf(stderr, "failed to allocate concat for sources\n");
 
-    char *cbld_cflags_path = strconcat(cbld_dir, "/cflags");
-    char *cbld_cxxflags_path = strconcat(cbld_dir, "/cxxflags");
-    char *cbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
-
-    char *cbld_target_path = strconcat(cbld_dir, "/target");
-
-    char *cbld_compiler_path = strconcat(cbld_dir, "/compiler");
-    char *cbld_linker_path = strconcat(cbld_dir, "/linker");
-
-    char *cbld_includes_path = strconcat(cbld_dir, "/includes");
-
-    if (
-        !cbld_sources_path ||
-        !cbld_cflags_path ||
-        !cbld_cxxflags_path ||
-        !cbld_ldflags_path ||
-        !cbld_target_path ||
-        !cbld_compiler_path ||
-        !cbld_linker_path ||
-        !cbld_includes_path
-    ) {
         free(cbld_sources_path);
 
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_cflags_path = strconcat(cbld_dir, "/cflags");
+    if (!cbld_cflags_path) {
+        fprintf(stderr, "failed to allocate concat for cflags\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_cxxflags_path = strconcat(cbld_dir, "/cxxflags");
+    if (!cbld_cxxflags_path) {
+        fprintf(stderr, "failed to allocate concat for cxxflags\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
+
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
+    if (!cbld_ldflags_path) {
+        fprintf(stderr, "failed to allocate concat for ldflags\n");
+
+        free(cbld_sources_path);
         free(cbld_cflags_path);
         free(cbld_cxxflags_path);
         free(cbld_ldflags_path);
 
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_target_path = strconcat(cbld_dir, "/target");
+    if (!cbld_target_path) {
+        fprintf(stderr, "failed to allocate concat for target\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
+        free(cbld_ldflags_path);
         free(cbld_target_path);
 
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_compiler_path = strconcat(cbld_dir, "/compiler");
+    if (!cbld_compiler_path) {
+        fprintf(stderr, "failed to allocate concat for compiler\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
+        free(cbld_ldflags_path);
+        free(cbld_target_path);
+        free(cbld_compiler_path);
+
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_linker_path = strconcat(cbld_dir, "/linker");
+    if (!cbld_linker_path) {
+        fprintf(stderr, "failed to allocate concat for linker\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
+        free(cbld_ldflags_path);
+        free(cbld_target_path);
         free(cbld_compiler_path);
         free(cbld_linker_path);
 
+        free(build_dir);
+
+        return 1;
+    }
+
+    char *cbld_includes_path = strconcat(cbld_dir, "/includes");
+    if (!cbld_includes_path) {
+        fprintf(stderr, "failed to allocate concat for includes\n");
+
+        free(cbld_sources_path);
+        free(cbld_cflags_path);
+        free(cbld_cxxflags_path);
+        free(cbld_ldflags_path);
+        free(cbld_target_path);
+        free(cbld_compiler_path);
+        free(cbld_linker_path);
         free(cbld_includes_path);
 
         free(build_dir);
