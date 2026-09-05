@@ -10,8 +10,7 @@ typedef struct {
     size_t size;
 } file_data_t;
 
-int file_read(const char *path, file_data_t *out)
-{
+int file_read(const char *path, file_data_t *out) {
     FILE *fp;
     long size;
     char *data;
@@ -66,8 +65,8 @@ int file_read(const char *path, file_data_t *out)
 
     return 0;
 }
-void file_free(file_data_t *file)
-{
+
+void file_free(file_data_t *file) {
     if (file == NULL)
         return;
 

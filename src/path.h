@@ -7,8 +7,7 @@
 
 #include "str.h"
 
-char *path_object(const char *build_dir, const char *source)
-{
+char *path_object(const char *build_dir, const char *source) {
     const char *name = strrchr(source, '/');
 
 

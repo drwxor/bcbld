@@ -5,8 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *strjoin(char *const items[], size_t count, const char *separator)
-{
+char *strjoin(char *const items[], size_t count, const char *separator) {
     size_t total = 1;
     size_t sep_len = strlen(separator);
 
@@ -38,8 +37,7 @@ char *strjoin(char *const items[], size_t count, const char *separator)
 
     return result;
 }
-char *strconcat(const char *a, const char *b)
-{
+char *strconcat(const char *a, const char *b) {
     size_t len_a = strlen(a);
     size_t len_b = strlen(b);
 
@@ -55,8 +53,7 @@ char *strconcat(const char *a, const char *b)
 
     return result;
 }
-char **str_unpack(char *data, size_t size, size_t *count)
-{
+char **str_unpack(char *data, size_t size, size_t *count) {
     size_t capacity = 8;
     size_t used = 0;
     size_t start = 0;
@@ -106,8 +103,7 @@ char **str_unpack(char *data, size_t size, size_t *count)
     return items;
 }
 
-void str_unpack_free(char **items)
-{
+void str_unpack_free(char **items) {
     free(items);
 }
 
