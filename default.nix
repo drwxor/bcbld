@@ -1,15 +1,13 @@
-let
-  pkgs = import <nixpkgs> {};
-in
+{ stdenv, clang }:
 
-pkgs.stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = "cbld";
   version = "0.1.0";
 
   src = ./.;
 
   nativeBuildInputs = [
-    pkgs.clang
+    clang
   ];
 
   buildPhase = ''
