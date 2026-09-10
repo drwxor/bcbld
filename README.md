@@ -19,13 +19,9 @@ cbld requires:
 
 ## Building
 
-Clone the repository and build cbld:
+Clone the repository and run compile.sh:
 
-```sh
-cbld build
-```
-
-The resulting executable is placed in the same directory where `cbld build` ran.
+The resulting executable is placed in the same directory where compile.sh ran.
 
 ## Running
 
