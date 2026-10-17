@@ -1,18 +1,18 @@
-# cbld
+# bcbld
 
-cbld is a small and simple build tool for C and C++ projects.
+bcbld is a small and simple build tool for C and C++ projects.
 
 It is designed around a plain-text project configuration and a small set of build commands, without requiring generated build files.
 
 ## Status
 
-cbld is experimental and under development.
+bcbld is experimental and under development.
 
 The project format and command interface may change.
 
 ## Dependencies
 
-cbld requires:
+bcbld requires:
 
 * A C compiler
 * A C++ compiler for C++ projects
@@ -25,10 +25,10 @@ The resulting executable is placed in the same directory where compile.sh ran.
 
 ## Running
 
-cbld uses a `cbld/` directory in the project root for configuration:
+bcbld uses a `bcbld/` directory in the project root for configuration:
 
 ```text
-cbld/
+bcbld/
 ├── sources
 ├── cflags
 ├── cxxflags
@@ -39,7 +39,7 @@ cbld/
 └── commands/
 ```
 
-A basic project can define its source files in `cbld/sources`:
+A basic project can define its source files in `bcbld/sources`:
 
 ```text
 src/main.c
@@ -50,19 +50,19 @@ src/bar.c
 Build the project with:
 
 ```sh
-cbld build
+bcbld build
 ```
 
-Custom commands can be placed in `cbld/commands/` and invoked with:
+Custom commands can be placed in `bcbld/commands/` and invoked with:
 
 ```sh
-cbld cmd <command>
+bcbld cmd <command>
 ```
 
 For more information:
 
 ```sh
-cbld help
+bcbld help
 ```
 
 ## Contributing

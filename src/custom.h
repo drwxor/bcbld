@@ -12,11 +12,11 @@
 
 static int custom(int argc, char **argv, const char *dir_path) {
     if (argc < 3) {
-        fprintf(stderr, "cbld: missing custom command\n");
+        fprintf(stderr, "bcbld: missing custom command\n");
         return 1;
     }
 
-    char *commands_dir = strconcat(dir_path, "/cbld/commands/");
+    char *commands_dir = strconcat(dir_path, "/bcbld/commands/");
     if (!commands_dir)
         return 1;
 
@@ -30,7 +30,7 @@ static int custom(int argc, char **argv, const char *dir_path) {
     pid_t pid = fork();
 
     if (pid < 0) {
-        perror("cbld: fork");
+        perror("bcbld: fork");
         free(path);
         return 1;
     }
@@ -38,7 +38,7 @@ static int custom(int argc, char **argv, const char *dir_path) {
     if (pid == 0) {
         execv(path, &argv[2]);
 
-        perror("cbld: exec");
+        perror("bcbld: exec");
         free(path);
         _exit(127);
     }
@@ -48,7 +48,7 @@ static int custom(int argc, char **argv, const char *dir_path) {
     int status;
 
     if (waitpid(pid, &status, 0) < 0) {
-        perror("cbld: waitpid");
+        perror("bcbld: waitpid");
         return 1;
     }
 

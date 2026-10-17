@@ -24,130 +24,130 @@ static int build(const char *dir_path, const char *cbld_dir) {
         return 1;
     }
 
-    char *cbld_sources_path = strconcat(cbld_dir, "/sources");
-    if (!cbld_sources_path) {
+    char *bcbld_sources_path = strconcat(cbld_dir, "/sources");
+    if (!bcbld_sources_path) {
         fprintf(stderr, "failed to allocate concat for sources\n");
 
-        free(cbld_sources_path);
+        free(bcbld_sources_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_cflags_path = strconcat(cbld_dir, "/cflags");
-    if (!cbld_cflags_path) {
+    char *bcbld_cflags_path = strconcat(cbld_dir, "/cflags");
+    if (!bcbld_cflags_path) {
         fprintf(stderr, "failed to allocate concat for cflags\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_cxxflags_path = strconcat(cbld_dir, "/cxxflags");
-    if (!cbld_cxxflags_path) {
+    char *bcbld_cxxflags_path = strconcat(cbld_dir, "/cxxflags");
+    if (!bcbld_cxxflags_path) {
         fprintf(stderr, "failed to allocate concat for cxxflags\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
-    if (!cbld_ldflags_path) {
+    char *bcbld_ldflags_path = strconcat(cbld_dir, "/ldflags");
+    if (!bcbld_ldflags_path) {
         fprintf(stderr, "failed to allocate concat for ldflags\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
-        free(cbld_ldflags_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
+        free(bcbld_ldflags_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_target_path = strconcat(cbld_dir, "/target");
-    if (!cbld_target_path) {
+    char *bcbld_target_path = strconcat(cbld_dir, "/target");
+    if (!bcbld_target_path) {
         fprintf(stderr, "failed to allocate concat for target\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
-        free(cbld_ldflags_path);
-        free(cbld_target_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
+        free(bcbld_ldflags_path);
+        free(bcbld_target_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_compiler_path = strconcat(cbld_dir, "/compiler");
-    if (!cbld_compiler_path) {
+    char *bcbld_compiler_path = strconcat(cbld_dir, "/compiler");
+    if (!bcbld_compiler_path) {
         fprintf(stderr, "failed to allocate concat for compiler\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
-        free(cbld_ldflags_path);
-        free(cbld_target_path);
-        free(cbld_compiler_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
+        free(bcbld_ldflags_path);
+        free(bcbld_target_path);
+        free(bcbld_compiler_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_linker_path = strconcat(cbld_dir, "/linker");
-    if (!cbld_linker_path) {
+    char *bcbld_linker_path = strconcat(cbld_dir, "/linker");
+    if (!bcbld_linker_path) {
         fprintf(stderr, "failed to allocate concat for linker\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
-        free(cbld_ldflags_path);
-        free(cbld_target_path);
-        free(cbld_compiler_path);
-        free(cbld_linker_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
+        free(bcbld_ldflags_path);
+        free(bcbld_target_path);
+        free(bcbld_compiler_path);
+        free(bcbld_linker_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    char *cbld_includes_path = strconcat(cbld_dir, "/includes");
-    if (!cbld_includes_path) {
+    char *bcbld_includes_path = strconcat(cbld_dir, "/includes");
+    if (!bcbld_includes_path) {
         fprintf(stderr, "failed to allocate concat for includes\n");
 
-        free(cbld_sources_path);
-        free(cbld_cflags_path);
-        free(cbld_cxxflags_path);
-        free(cbld_ldflags_path);
-        free(cbld_target_path);
-        free(cbld_compiler_path);
-        free(cbld_linker_path);
-        free(cbld_includes_path);
+        free(bcbld_sources_path);
+        free(bcbld_cflags_path);
+        free(bcbld_cxxflags_path);
+        free(bcbld_ldflags_path);
+        free(bcbld_target_path);
+        free(bcbld_compiler_path);
+        free(bcbld_linker_path);
+        free(bcbld_includes_path);
 
         free(build_dir);
 
         return 1;
     }
 
-    file_data_t cbld_sources = {0};
-    file_data_t cbld_cflags = {0};
-    file_data_t cbld_cxxflags = {0};
-    file_data_t cbld_ldflags = {0};
-    file_data_t cbld_compiler = {0};
-    file_data_t cbld_linker = {0};
-    file_data_t cbld_target = {0};
-    file_data_t cbld_includes = {0};
+    file_data_t bcbld_sources = {0};
+    file_data_t bcbld_cflags = {0};
+    file_data_t bcbld_cxxflags = {0};
+    file_data_t bcbld_ldflags = {0};
+    file_data_t bcbld_compiler = {0};
+    file_data_t bcbld_linker = {0};
+    file_data_t bcbld_target = {0};
+    file_data_t bcbld_includes = {0};
 
     char **sources = NULL;
     char **cflags = NULL;
@@ -172,49 +172,49 @@ static int build(const char *dir_path, const char *cbld_dir) {
 
     char *target_path = NULL;
 
-    if (file_read(cbld_sources_path, &cbld_sources) < 0) {
+    if (file_read(bcbld_sources_path, &bcbld_sources) < 0) {
         fprintf(stderr, "failed to read sources\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_cflags_path, &cbld_cflags) < 0) {
+    if (file_read(bcbld_cflags_path, &bcbld_cflags) < 0) {
         fprintf(stderr, "failed to read cflags\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_cxxflags_path, &cbld_cxxflags) < 0) {
+    if (file_read(bcbld_cxxflags_path, &bcbld_cxxflags) < 0) {
         fprintf(stderr, "failed to read cxxflags\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_ldflags_path, &cbld_ldflags) < 0) {
+    if (file_read(bcbld_ldflags_path, &bcbld_ldflags) < 0) {
         fprintf(stderr, "failed to read ldflags\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_compiler_path, &cbld_compiler) < 0) {
+    if (file_read(bcbld_compiler_path, &bcbld_compiler) < 0) {
         fprintf(stderr, "failed to read compiler\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_linker_path, &cbld_linker) < 0) {
+    if (file_read(bcbld_linker_path, &bcbld_linker) < 0) {
         fprintf(stderr, "failed to read linker\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_target_path, &cbld_target) < 0) {
+    if (file_read(bcbld_target_path, &bcbld_target) < 0) {
         fprintf(stderr, "failed to read target\n");
         goto cleanup;
     }
 
-    if (file_read(cbld_includes_path, &cbld_includes) < 0) {
+    if (file_read(bcbld_includes_path, &bcbld_includes) < 0) {
         fprintf(stderr, "failed to read includes\n");
         goto cleanup;
     }
 
     sources = str_unpack(
-        cbld_sources.data,
-        cbld_sources.size,
+        bcbld_sources.data,
+        bcbld_sources.size,
         &source_count
     );
 
@@ -224,8 +224,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     cflags = str_unpack(
-        cbld_cflags.data,
-        cbld_cflags.size,
+        bcbld_cflags.data,
+        bcbld_cflags.size,
         &cflags_count
     );
 
@@ -235,8 +235,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     cxxflags = str_unpack(
-        cbld_cxxflags.data,
-        cbld_cxxflags.size,
+        bcbld_cxxflags.data,
+        bcbld_cxxflags.size,
         &cxxflags_count
     );
 
@@ -246,8 +246,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     includes = str_unpack(
-        cbld_includes.data,
-        cbld_includes.size,
+        bcbld_includes.data,
+        bcbld_includes.size,
         &includes_count
     );
 
@@ -257,8 +257,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     ldflags = str_unpack(
-        cbld_ldflags.data,
-        cbld_ldflags.size,
+        bcbld_ldflags.data,
+        bcbld_ldflags.size,
         &ldflags_count
     );
 
@@ -268,8 +268,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     compiler = str_unpack(
-        cbld_compiler.data,
-        cbld_compiler.size,
+        bcbld_compiler.data,
+        bcbld_compiler.size,
         &compiler_count
     );
 
@@ -279,8 +279,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     linker = str_unpack(
-        cbld_linker.data,
-        cbld_linker.size,
+        bcbld_linker.data,
+        bcbld_linker.size,
         &linker_count
     );
 
@@ -290,8 +290,8 @@ static int build(const char *dir_path, const char *cbld_dir) {
     }
 
     target = str_unpack(
-        cbld_target.data,
-        cbld_target.size,
+        bcbld_target.data,
+        bcbld_target.size,
         &target_count
     );
 
@@ -659,27 +659,27 @@ compile_cleanup:
     str_unpack_free(compiler);
     str_unpack_free(linker);
 
-    file_free(&cbld_target);
-    file_free(&cbld_ldflags);
-    file_free(&cbld_cflags);
-    file_free(&cbld_cxxflags);
-    file_free(&cbld_sources);
-    file_free(&cbld_includes);
-    file_free(&cbld_compiler);
-    file_free(&cbld_linker);
+    file_free(&bcbld_target);
+    file_free(&bcbld_ldflags);
+    file_free(&bcbld_cflags);
+    file_free(&bcbld_cxxflags);
+    file_free(&bcbld_sources);
+    file_free(&bcbld_includes);
+    file_free(&bcbld_compiler);
+    file_free(&bcbld_linker);
 
-    free(cbld_sources_path);
+    free(bcbld_sources_path);
 
-    free(cbld_cflags_path);
-    free(cbld_cxxflags_path);
-    free(cbld_ldflags_path);
+    free(bcbld_cflags_path);
+    free(bcbld_cxxflags_path);
+    free(bcbld_ldflags_path);
 
-    free(cbld_target_path);
+    free(bcbld_target_path);
 
-    free(cbld_compiler_path);
-    free(cbld_linker_path);
+    free(bcbld_compiler_path);
+    free(bcbld_linker_path);
 
-    free(cbld_includes_path);
+    free(bcbld_includes_path);
 
     free(build_dir);
 
@@ -727,27 +727,27 @@ cleanup:
     if (linker)
         str_unpack_free(linker);
 
-    file_free(&cbld_target);
-    file_free(&cbld_ldflags);
-    file_free(&cbld_cflags);
-    file_free(&cbld_cxxflags);
-    file_free(&cbld_sources);
-    file_free(&cbld_includes);
-    file_free(&cbld_compiler);
-    file_free(&cbld_linker);
+    file_free(&bcbld_target);
+    file_free(&bcbld_ldflags);
+    file_free(&bcbld_cflags);
+    file_free(&bcbld_cxxflags);
+    file_free(&bcbld_sources);
+    file_free(&bcbld_includes);
+    file_free(&bcbld_compiler);
+    file_free(&bcbld_linker);
 
-    free(cbld_sources_path);
+    free(bcbld_sources_path);
 
-    free(cbld_cflags_path);
-    free(cbld_cxxflags_path);
-    free(cbld_ldflags_path);
+    free(bcbld_cflags_path);
+    free(bcbld_cxxflags_path);
+    free(bcbld_ldflags_path);
 
-    free(cbld_target_path);
+    free(bcbld_target_path);
 
-    free(cbld_compiler_path);
-    free(cbld_linker_path);
+    free(bcbld_compiler_path);
+    free(bcbld_linker_path);
 
-    free(cbld_includes_path);
+    free(bcbld_includes_path);
 
     free(build_dir);
 

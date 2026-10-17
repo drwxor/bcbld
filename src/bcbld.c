@@ -41,13 +41,13 @@ int main(int argc, char **argv) {
         case COMMAND_BUILD: {
             const char *dir_path = argc >= 3 ? argv[2] : ".";
 
-            char *cbld_dir = strconcat(dir_path, "/cbld");
-            if (!cbld_dir)
+            char *bcbld_dir = strconcat(dir_path, "/bcbld");
+            if (!bcbld_dir)
                 return 1;
 
-            int result = build(dir_path, cbld_dir);
+            int result = build(dir_path, bcbld_dir);
 
-            free(cbld_dir);
+            free(bcbld_dir);
             return result;
         }
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
         }
 
         case COMMAND_UNKNOWN:
-            printf("cbld: unknown command\n");
+            printf("bcbld: unknown command\n");
             return 1;
     }
 
