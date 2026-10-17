@@ -21,7 +21,23 @@ bcbld requires:
 
 Clone the repository and run compile.sh:
 
-The resulting executable is placed in the same directory where compile.sh ran.
+```sh
+./compile.sh
+```
+
+On Windows, run compile.bat from the repository root instead. It uses `clang` if it is on `PATH`, and otherwise MSVC `cl` (from a Developer Command Prompt):
+
+```bat
+.\compile.bat
+```
+
+The resulting executable is placed in the same directory where the script ran.
+
+### Windows notes
+
+* bcbld passes GCC-style flags (`-c`, `-o`, `-I`) to the compiler and linker, so use `clang`/`clang++` or MinGW `gcc`/`g++` in `bcbld/compiler` and `bcbld/linker`. MSVC `cl` is not supported as the project compiler.
+* Include the `.exe` extension in `bcbld/target` if you want it (e.g. `app.exe`).
+* Custom commands in `bcbld/commands/` may be `.exe`, `.com`, `.bat` or `.cmd` files; `bcbld cmd run` finds `run.bat`, `run.exe`, etc.
 
 ## Running
 

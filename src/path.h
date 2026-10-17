@@ -10,6 +10,12 @@
 char *path_object(const char *build_dir, const char *source) {
     const char *name = strrchr(source, '/');
 
+#ifdef _WIN32
+    const char *backslash = strrchr(source, '\\');
+
+    if (backslash && (!name || backslash > name))
+        name = backslash;
+#endif
 
     if (name)
         name++;

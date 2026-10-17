@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/wait.h>
-#include <unistd.h>
-
 #include "str.h"
 #include "build.h"
 #include "custom.h"
